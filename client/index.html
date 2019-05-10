@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<head>
+    <title>Speech recognition service</title>
+    <meta charset="utf-8">
+</head>
+<body>
+<h2 id="command"><i>Скажите что-нибудь...</i></h2>
+<ul id="history"></ul>
+
+<script src="speech.js"></script>
+<script src="request-helper.js"></script>
+<script src="ui-helper.js"></script>
+<script>
+    const recognitionManager = new SpeechRecognitionManager();
+    recognitionManager.start();
+    // annyang.addListener((results) => {
+    // 	ui.updateCommandAndHistory(results.join(', '));
+    // 	if (results.length) http.post('http://localhost:8080/command', results[0]);
+    // });
+</script>
+</body>
