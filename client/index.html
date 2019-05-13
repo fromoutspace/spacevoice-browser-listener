@@ -13,9 +13,9 @@
 <script>
     const recognitionManager = new SpeechRecognitionManager();
     recognitionManager.start();
-    // annyang.addListener((results) => {
-    // 	ui.updateCommandAndHistory(results.join(', '));
-    // 	if (results.length) http.post('http://localhost:8080/command', results[0]);
-    // });
+    recognitionManager.setOnResultCallback((results) => {
+    	ui.updateCommandAndHistory(results.join(', '));
+    	if (results.length) http.post('http://localhost:8080/command', results[0]);
+    });
 </script>
 </body>

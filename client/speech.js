@@ -8,14 +8,12 @@ class SpeechRecognitionManager {
     }
 
     start() {
-        console.log("Starting");
         this.lastStartTime = new Date().getTime();
         this.restartCallCounter = 0;
         this.speechRecognition.start();
     }
 
     restart() {
-        console.log("Restarting");
         if (this.restartCallCounter > 0) return;
 
         this.restartCallCounter++;
@@ -85,7 +83,7 @@ class ManagedSpeechRecognitionConfigurer {
             }
         };
         this.speechRecognition.onresult = event => {
-            const textResults = event.results[event.resultIndex].map(result => result.transcript);
+            const textResults = [...event.results[event.resultIndex]].map(result => result.transcript);
             this.speechRecognitionManager.handleResults(textResults);
         };
         this.speechRecognition.onend = () => {
