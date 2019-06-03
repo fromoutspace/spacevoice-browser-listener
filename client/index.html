@@ -11,11 +11,17 @@
 <script src="request-helper.js"></script>
 <script src="ui-helper.js"></script>
 <script>
+    // Express server will replace this value
+    let thisServerPort = '#serverPortToReplace';
+    thisServerPort = isNaN(thisServerPort) ? '3000' : thisServerPort;
+
+    const commandCallbackUrl = 'http://localhost:' + thisServerPort + "/command";
+
     const recognitionManager = new SpeechRecognitionManager();
     recognitionManager.start();
     recognitionManager.setOnResultCallback((results) => {
-    	ui.updateCommandAndHistory(results.join(', '));
-    	if (results.length) http.post('http://localhost:8080/command', results[0]);
+        ui.updateCommandAndHistory(results.join(', '));
+        if (results.length) http.post(commandCallbackUrl, results[0]);
     });
 </script>
 </body>
