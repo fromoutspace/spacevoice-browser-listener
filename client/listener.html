@@ -4,7 +4,9 @@
     <meta charset="utf-8">
 </head>
 <body>
-<h2 id="command"><i>Скажите что-нибудь...</i></h2>
+<h2 id="command"><i>Скажите что-нибудь...</i>
+    <button id="stopRecording">Остановить и закрыть</button>
+</h2>
 <ul id="history"></ul>
 
 <script src="speech.js"></script>
@@ -16,6 +18,7 @@
     thisServerPort = isNaN(thisServerPort) ? '3000' : thisServerPort;
 
     const commandCallbackUrl = 'http://localhost:' + thisServerPort + "/command";
+    const stopRecordingUrl = 'http://localhost:' + thisServerPort + "/stop";
 
     const recognitionManager = new SpeechRecognitionManager();
     recognitionManager.start();
@@ -23,5 +26,12 @@
         ui.updateCommandAndHistory(results.join(', '));
         if (results.length) http.post(commandCallbackUrl, {command: results});
     });
+
+    const stopButton = document.getElementById('stopRecording');
+    stopButton.onclick = () => {
+        recognitionManager.stop();
+        http.post(stopRecordingUrl, {isStopped: true});
+    };
+
 </script>
 </body>

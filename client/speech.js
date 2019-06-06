@@ -4,17 +4,24 @@ class SpeechRecognitionManager {
         this.speechRecognition = new ManagedSpeechRecognitionConfigurer(this).getSpeechRecognitionInstance();
         this.lastStartTime = -1;
         this.restartCallCounter = 0;
+        this.isStoped = false;
         this.onResultCallback = results => console.log(results);
     }
 
     start() {
         this.lastStartTime = new Date().getTime();
+        this.isStoped = false;
         this.restartCallCounter = 0;
         this.speechRecognition.start();
     }
 
+    stop() {
+        this.speechRecognition.stop();
+        this.isStoped = true;
+    }
+
     restart() {
-        if (this.restartCallCounter > 0) return;
+        if (this.isStoped || this.restartCallCounter > 0) return;
 
         this.restartCallCounter++;
 
