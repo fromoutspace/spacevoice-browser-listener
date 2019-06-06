@@ -21,7 +21,7 @@
     recognitionManager.start();
     recognitionManager.setOnResultCallback((results) => {
         ui.updateCommandAndHistory(results.join(', '));
-        if (results.length) http.post(commandCallbackUrl, results[0]);
+        if (results.length) http.post(commandCallbackUrl, {command: results});
     });
 </script>
 </body>

@@ -4,11 +4,11 @@
   "description": "",
   "main": "server.js",
   "dependencies": {
-    "body-parser": "latest",
     "dotenv": "^8.0.0",
     "express": "^4.16.4",
     "fs-extra": "^8.0.1",
-    "got": "^9.6.0"
+    "got": "^9.6.0",
+    "plainTextParser": "^1.0.3"
   },
   "devDependencies": {},
   "scripts": {
