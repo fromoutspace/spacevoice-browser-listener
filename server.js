@@ -1,23 +1,25 @@
 const express = require('express');
+const request = require('request');
 const fs = require('fs-extra');
 const path = require('path');
-const got = require('got');
 const puppeteer = require('puppeteer');
 require('dotenv').config();
 
 const app = express();
 const frontPagePath = path.join(__dirname, 'client', 'listener.html');
 const frontPageFileContent = fs.readFileSync(frontPagePath, "utf8");
-const urlToForwardCommand = process.env.commandControllerUrl || 'http://localhost:8080';
-const port = process.env.thisServerPort || '3000';
-const frontPageUrl = "http://localhost:" + port;
+const urlToForwardCommand = process.env.urlToForwardCommand;
+const port = process.env.thisServerPort;
+const frontPageUrl = `http://localhost:${port}`;
 const frontPageContent = frontPageFileContent.replace('#serverPortToReplace', port);
-const chromePath = process.env.chromePath || "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe";
-const doNothing = () => {
-};
+const chromePath = process.env.chromePath;
+
 const browserSettings = {
     headless: false,
-    args: ['--use-fake-ui-for-media-stream'],
+    args: [
+        '--use-fake-ui-for-media-stream',
+        '--no-sandbox',
+        '--fast-start'],
     executablePath: chromePath
 };
 
@@ -27,16 +29,21 @@ const controller = {
         console.log(`Voice-Listener is working on ${frontPageUrl}`);
         openBrowser();
     },
-    forwardCommand(request, response) {
-        const commands = request.body.commands;
-        if (commands) got.post(urlToForwardCommand, {body: commands[0]}).catch(doNothing)
+    forwardCommand(req, resp) {
+        const commands = req.body.command || [];
+        if (commands.length)
+            request({
+                uri: urlToForwardCommand,
+                method: 'POST',
+                json: {command: commands[0]}
+            });
     },
-    startBrowserRecording(request, response) {
+    startBrowserRecording(req, resp) {
         browserHandler.shouldReopenBrowser = true;
         openBrowser();
     },
-    stopBrowserRecording(request, response) {
-        let isStopped = request.body.isStopped === true;
+    stopBrowserRecording(req, resp) {
+        let isStopped = req.body.isStopped === true;
         browserHandler.shouldReopenBrowser = isStopped === false;
         if (isStopped) browserHandler.browser.close();
     }

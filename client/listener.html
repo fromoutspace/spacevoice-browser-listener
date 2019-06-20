@@ -11,25 +11,24 @@
 <script src="request-helper.js"></script>
 <script src="ui-helper.js"></script>
 <script>
-    // Express server will replace this value
+    // Back-end server will replace this value to real configured port
     let thisServerPort = '#serverPortToReplace';
     thisServerPort = isNaN(thisServerPort) ? '3000' : thisServerPort;
 
     const commandCallbackUrl = 'http://localhost:' + thisServerPort + "/command";
     const stopRecordingUrl = 'http://localhost:' + thisServerPort + "/stop";
+    const stopButton = document.getElementById('stopRecording');
 
     const recognitionManager = new SpeechRecognitionManager();
     recognitionManager.start();
     recognitionManager.setOnResultCallback((results) => {
         ui.updateCommandAndHistory(results.join(', '));
-        if (results.length) http.post(commandCallbackUrl, {command: results});
+        if (results.length) request.post(commandCallbackUrl, {command: results});
     });
 
-    const stopButton = document.getElementById('stopRecording');
     stopButton.onclick = () => {
         recognitionManager.stop();
-        http.post(stopRecordingUrl, {isStopped: true});
+        request.post(stopRecordingUrl, {isStopped: true});
     };
-
 </script>
 </body>
