@@ -101,3 +101,25 @@ class ManagedSpeechRecognitionConfigurer {
         };
     }
 }
+
+class SpeechManager {
+    constructor() {
+        this.synthesis = window.speechSynthesis;
+        this.voiceLang = 'ru-RU'
+    }
+
+    say(text) {
+        const utter = this.getUtter(text);
+        this.synthesis.speak(utter);
+    }
+
+    getUtter(text) {
+        if (!this.utter) {
+            this.utter = new SpeechSynthesisUtterance(text);
+            this.utter.voice = this.synthesis.getVoices()
+                .find(voice => voice.lang === this.voiceLang && voice.name.includes('Google'))
+        }
+        this.utter.text = text;
+        return this.utter;
+    }
+}

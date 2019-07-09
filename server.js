@@ -3,28 +3,46 @@ const request = require('request');
 const fs = require('fs-extra');
 const path = require('path');
 const puppeteer = require('puppeteer');
+const WebSocket = require('ws');
 require('dotenv').config();
 
+
 const app = express();
-const frontPagePath = path.join(__dirname, 'client', 'listener.html');
-const frontPageFileContent = fs.readFileSync(frontPagePath, "utf8");
+
 const urlToForwardCommand = process.env.urlToForwardCommand;
-const port = process.env.thisServerPort;
-const frontPageUrl = `http://localhost:${port}`;
-const frontPageContent = frontPageFileContent.replace('#serverPortToReplace', port);
+const thisServerPort = process.env.thisServerPort;
+const thisWsServerPort = process.env.thisWsServerPort;
 const chromePath = process.env.chromePath;
 
+const frontPagePath = path.join(__dirname, 'client', 'listener.html');
+const frontPageFileContent = fs.readFileSync(frontPagePath, "utf8");
+const frontPageUrl = `http://localhost:${thisServerPort}`;
+const frontPageContent = frontPageFileContent
+    .replace('#serverPortToReplace', thisServerPort)
+    .replace('#wsServerPortToReplace', thisWsServerPort);
+
+const browserHandler = {browser: null, shouldReopenBrowser: true};
 const browserSettings = {
     headless: false,
     args: [
         '--use-fake-ui-for-media-stream',
+        '--enable-speech-dispatcher',
+        '--autoplay-policy=no-user-gesture-required',
         '--no-sandbox',
         '--fast-start'],
     executablePath: chromePath
 };
 
-const browserHandler = {browser: null, shouldReopenBrowser: true};
-const controller = {
+const wsClients = {};
+const wssController = {
+    saveBrowserSocket(socket) {
+        wsClients.browserSocket = socket;
+    }
+};
+const wss = new WebSocket.Server({port: thisWsServerPort});
+wss.on('connection', wssController.saveBrowserSocket);
+
+const serverController = {
     onServerStart() {
         console.log(`Voice-Listener is working on ${frontPageUrl}`);
         openBrowser();
@@ -46,16 +64,22 @@ const controller = {
         let isStopped = req.body.isStopped === true;
         browserHandler.shouldReopenBrowser = isStopped === false;
         if (isStopped) browserHandler.browser.close();
+    },
+    sayText(req, resp) {
+        if (wsClients.browserSocket)
+            wsClients.browserSocket.send(req.body.text);
+        resp.send('OK')
     }
 };
 
 app
     .use(express.static('client'), express.json())
     .get('/', (request, response) => response.send(frontPageContent))
-    .post('/command', controller.forwardCommand)
-    .get('/start', controller.startBrowserRecording)
-    .post('/stop', controller.stopBrowserRecording)
-    .listen(port, controller.onServerStart);
+    .post('/say', serverController.sayText)
+    .post('/command', serverController.forwardCommand)
+    .get('/start', serverController.startBrowserRecording)
+    .post('/stop', serverController.stopBrowserRecording)
+    .listen(thisServerPort, serverController.onServerStart);
 
 
 async function openFrontPage(browser) {
@@ -74,3 +98,4 @@ function openBrowser() {
         await openFrontPage(browser);
     })()
 }
+

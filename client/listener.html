@@ -4,9 +4,12 @@
     <meta charset="utf-8">
 </head>
 <body>
+<pre id="ws-status"></pre>
 <h2 id="command"><i>Скажите что-нибудь...</i></h2>
 <ul id="history"></ul>
-<div><button id="stopRecording">Остановить и закрыть</button></div>
+<div>
+    <button id="stopRecording">Остановить и закрыть</button>
+</div>
 <script src="speech.js"></script>
 <script src="request-helper.js"></script>
 <script src="ui-helper.js"></script>
@@ -30,5 +33,21 @@
         recognitionManager.stop();
         request.post(stopRecordingUrl, {isStopped: true});
     };
+</script>
+
+<script>
+    let thisWsServerPort = '#wsServerPortToReplace';
+    thisWsServerPort = isNaN(thisWsServerPort) ? '8080' : thisWsServerPort;
+    const wsUrl = "ws://localhost:" + thisWsServerPort;
+
+    const speechManager = new SpeechManager();
+
+    const ws = new WebSocket(wsUrl);
+    ws.onopen = () => ui.updateWsStatus(true);
+    ws.onmessage = message => {
+        const text = message.data;
+        speechManager.say(text);
+        ui.updateCommandAndHistory('♪ ' + text)
+    }
 </script>
 </body>
