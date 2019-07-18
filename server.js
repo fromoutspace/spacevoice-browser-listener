@@ -2,24 +2,24 @@ const express = require('express');
 const request = require('request');
 const fs = require('fs-extra');
 const path = require('path');
+const http = require('http');
 const puppeteer = require('puppeteer');
 const WebSocket = require('ws');
 require('dotenv').config();
 
 
 const app = express();
+const server = http.createServer(app);
 
 const urlToForwardCommand = process.env.urlToForwardCommand;
 const thisServerPort = process.env.thisServerPort;
-const thisWsServerPort = process.env.thisWsServerPort;
 const chromePath = process.env.chromePath;
 
 const frontPagePath = path.join(__dirname, 'client', 'listener.html');
 const frontPageFileContent = fs.readFileSync(frontPagePath, "utf8");
 const frontPageUrl = `http://localhost:${thisServerPort}`;
 const frontPageContent = frontPageFileContent
-    .replace('#serverPortToReplace', thisServerPort)
-    .replace('#wsServerPortToReplace', thisWsServerPort);
+    .replace('#serverPortToReplace', thisServerPort);
 
 const browserHandler = {browser: null, shouldReopenBrowser: true};
 const browserSettings = {
@@ -39,7 +39,7 @@ const wssController = {
         wsClients.browserSocket = socket;
     }
 };
-const wss = new WebSocket.Server({port: thisWsServerPort});
+const wss = new WebSocket.Server({server});
 wss.on('connection', wssController.saveBrowserSocket);
 
 const serverController = {
@@ -78,8 +78,9 @@ app
     .post('/say', serverController.sayText)
     .post('/command', serverController.forwardCommand)
     .get('/start', serverController.startBrowserRecording)
-    .post('/stop', serverController.stopBrowserRecording)
-    .listen(thisServerPort, serverController.onServerStart);
+    .post('/stop', serverController.stopBrowserRecording);
+
+server.listen(thisServerPort, serverController.onServerStart);
 
 
 async function openFrontPage(browser) {

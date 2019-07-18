@@ -36,9 +36,7 @@
 </script>
 
 <script>
-    let thisWsServerPort = '#wsServerPortToReplace';
-    thisWsServerPort = isNaN(thisWsServerPort) ? '8080' : thisWsServerPort;
-    const wsUrl = "ws://localhost:" + thisWsServerPort;
+    const wsUrl = "ws://localhost:" + thisServerPort;
 
     const speechManager = new SpeechManager();
 
