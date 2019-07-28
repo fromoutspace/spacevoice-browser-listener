@@ -5,10 +5,11 @@ const ui = {
     history: [],
     maxHistorySize: 10,
     command: '',
-    updateCommandAndHistory(text) {
+    updateCommandAndHistory(commandOptions) {
         if (this.command) this.updateHistory(this.command);
-        this.elementCommand.innerHTML = text;
-        this.command = text;
+        const [mainOption, ...otherOptions] = commandOptions;
+        this.elementCommand.innerHTML = `<h3>${mainOption}</h3><h4>${otherOptions.join(", ")}</h4>`;
+        this.command = mainOption;
     },
     updateHistory(text) {
         this.history.unshift(text);

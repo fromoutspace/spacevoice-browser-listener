@@ -61,7 +61,7 @@ class ManagedSpeechRecognitionConfigurer {
     fillProperties(speechRecognitionProperties) {
         const speechRecognitionDefaultProperties = {
             continuous: false,
-            maxAlternatives: 1,
+            maxAlternatives: 3,
             lang: "ru"
         };
         Object.assign(this.speechRecognition, speechRecognitionDefaultProperties);

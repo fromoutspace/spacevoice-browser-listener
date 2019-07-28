@@ -34,13 +34,26 @@ const browserSettings = {
 };
 
 const wsClients = {};
+let wss;
 const wssController = {
     saveBrowserSocket(socket) {
         wsClients.browserSocket = socket;
     }
 };
-const wss = new WebSocket.Server({server});
-wss.on('connection', wssController.saveBrowserSocket);
+(function wsConnect() {
+    wss = new WebSocket.Server({server})
+        .on('connection', () => {
+            console.log("WS connected");
+            wssController.saveBrowserSocket();
+        })
+        .on('error', () => {
+            console.log("WS error occurred")
+        })
+        .on('close', () => {
+            console.log("WS closed. Try to reconnect");
+            wsConnect();
+        })
+})();
 
 const serverController = {
     onServerStart() {
@@ -54,7 +67,10 @@ const serverController = {
                 uri: urlToForwardCommand,
                 method: 'POST',
                 json: {command: commands[0]}
+            }, {}, (a, b) => {
+                console.log(a, b)
             });
+        resp.send("OK")
     },
     startBrowserRecording(req, resp) {
         browserHandler.shouldReopenBrowser = true;

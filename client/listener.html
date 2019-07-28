@@ -5,7 +5,7 @@
 </head>
 <body>
 <pre id="ws-status"></pre>
-<h2 id="command"><i>Скажите что-нибудь...</i></h2>
+<div id="command"><i>Скажите что-нибудь...</i></div>
 <ul id="history"></ul>
 <div>
     <button id="stopRecording">Остановить и закрыть</button>
@@ -25,7 +25,7 @@
     const recognitionManager = new SpeechRecognitionManager();
     recognitionManager.start();
     recognitionManager.setOnResultCallback((results) => {
-        ui.updateCommandAndHistory(results.join(', '));
+        ui.updateCommandAndHistory(results);
         if (results.length) request.post(commandCallbackUrl, {command: results});
     });
 
